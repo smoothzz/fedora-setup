@@ -64,6 +64,12 @@
         state: absent
         autoremove: yes
 
+    - name: Remove Libreoffice
+      ansible.builtin.dnf:
+        name: libreoffice-core
+        state: absent
+        autoremove: yes
+
     - name: Enable service and start Cockpit
       ansible.builtin.service:
         name: cockpit.socket
@@ -75,6 +81,6 @@
         name: libvirtd
         enabled: yes
         state: started
-  
+
     - name: yum-clean-metadata
       ansible.builtin.command: yum clean all
