@@ -1,0 +1,80 @@
+- name: Configure computer
+  hosts: localhost
+  connection: local
+  gather_facts: true
+  become: true
+
+  tasks:
+    - name: Install core
+      ansible.builtin.yum:
+        name: "{{ packages }}"
+      vars:
+        packages:
+        - fedora-workstation-repositories
+        - dnf-plugins-core
+
+    - name: Import Microsoft key
+      ansible.builtin.rpm_key:
+        state: present
+        key: https://packages.microsoft.com/keys/microsoft.asc
+    
+    - name: Microsoft repo
+      ansible.builtin.yum_repository:
+        name: vscode-yum
+        description: Microsoft repo
+        baseurl: https://packages.microsoft.com/yumrepos/vscode
+        gpgcheck: yes
+        enabled: yes
+        repo_gpgcheck: no
+        gpgkey: https://packages.microsoft.com/keys/microsoft.asc
+
+    - name: Enable chrome repo
+      community.general.dnf_config_manager:
+        name: google-chrome
+        state: enabled
+
+    - name: Install a list of packages with a list variable
+      ansible.builtin.yum:
+        name: "{{ packages }}"
+        state: latest
+      vars:
+        packages:
+        - kernel-headers
+        - kernel-devel
+        - dkms
+        - elfutils-libelf-devel
+        - qt5-qtx11extras
+        - google-chrome-stable
+        - tilix
+        - flameshot
+        - ulauncher
+        - zsh
+        - gnome-tweak-tool
+        - numix-icon-theme-circle 
+        - code
+        - cockpit
+        - cockpit-machines
+        - '@virtualization'
+        - podman
+        - git
+    
+    - name: Remove Thunderbird
+      ansible.builtin.dnf:
+        name: thunderbird
+        state: absent
+        autoremove: yes
+
+    - name: Enable service and start Cockpit
+      ansible.builtin.service:
+        name: cockpit.socket
+        enabled: yes
+        state: started
+
+    - name: Enable and start libvirtd
+      ansible.builtin.service:
+        name: libvirtd
+        enabled: yes
+        state: started
+  
+    - name: yum-clean-metadata
+      ansible.builtin.command: yum clean all
