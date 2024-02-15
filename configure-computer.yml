@@ -17,7 +17,12 @@
       ansible.builtin.rpm_key:
         state: present
         key: https://packages.microsoft.com/keys/microsoft.asc
-    
+
+    - name: Import Microsoft key
+      ansible.builtin.rpm_key:
+        state: present
+        key: https://download.sublimetext.com/sublimehq-rpm-pub.gpg
+
     - name: Microsoft repo
       ansible.builtin.yum_repository:
         name: vscode-yum
@@ -33,6 +38,13 @@
         name: google-chrome
         state: enabled
 
+    - name: Sublime repo
+      ansible.builtin.yum_repository:
+        name: sublime
+        description: sublime repo
+        baseurl: https://download.sublimetext.com/rpm/stable/x86_64
+        enabled: yes
+    
     - name: Install a list of packages with a list variable
       ansible.builtin.yum:
         name: "{{ packages }}"
@@ -57,6 +69,7 @@
         - '@virtualization'
         - podman
         - git
+        - sublime-text
     
     - name: Remove Thunderbird
       ansible.builtin.dnf:
