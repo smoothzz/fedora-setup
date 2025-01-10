@@ -1,0 +1,149 @@
+- name: Configure computer
+  hosts: localhost
+  connection: local
+  gather_facts: true
+  become: true
+
+  tasks:
+    - name: Install core
+      ansible.builtin.yum:
+        name: "{{ packages }}"
+      vars:
+        packages:
+        - fedora-workstation-repositories
+        - dnf-plugins-core
+
+    - name: Import Microsoft key
+      ansible.builtin.rpm_key:
+        state: present
+        key: https://packages.microsoft.com/keys/microsoft.asc
+
+    - name: Import Sublime key
+      ansible.builtin.rpm_key:
+        state: present
+        key: https://download.sublimetext.com/sublimehq-rpm-pub.gpg
+
+    - name: Microsoft repo
+      ansible.builtin.yum_repository:
+        name: vscode-yum
+        description: Microsoft repo
+        baseurl: https://packages.microsoft.com/yumrepos/vscode
+        gpgcheck: yes
+        enabled: yes
+        repo_gpgcheck: no
+        gpgkey: https://packages.microsoft.com/keys/microsoft.asc
+
+    - name: Ensure Google Chrome repository is enabled
+      ansible.builtin.yum_repository:
+        name: google-chrome
+        enabled: yes
+        description: Google Chrome Repository
+        baseurl: https://dl.google.com/linux/chrome/rpm/stable/x86_64
+        gpgcheck: yes
+        gpgkey: https://dl.google.com/linux/linux_signing_key.pub
+
+    - name: Sublime repo
+      ansible.builtin.yum_repository:
+        name: sublime
+        description: sublime repo
+        baseurl: https://download.sublimetext.com/rpm/stable/x86_64
+        enabled: yes
+
+    - name: Add RPM Fusion free repository
+      yum_repository:
+        name: rpmfusion-free
+        description: RPM Fusion for Fedora Free
+        baseurl: https://download1.rpmfusion.org/free/fedora/updates/{{ ansible_distribution_major_version }}/$basearch/
+        enabled: yes
+        gpgcheck: yes
+        gpgkey: https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-{{ ansible_distribution_major_version }}.noarch.rpm
+
+    - name: Add RPM Fusion non-free repository
+      yum_repository:
+        name: rpmfusion-nonfree
+        description: RPM Fusion for Fedora Nonfree
+        baseurl: https://download1.rpmfusion.org/nonfree/fedora/updates/{{ ansible_distribution_major_version }}/$basearch/
+        enabled: yes
+        gpgcheck: yes
+        gpgkey: https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-{{ ansible_distribution_major_version }}.noarch.rpm
+
+    - name: Install a list of packages
+      ansible.builtin.yum:
+        name: "{{ packages }}"
+        state: latest
+      vars:
+        packages:
+        - kernel-headers
+        - kernel-devel
+        - dkms
+        - elfutils-libelf-devel
+        - qt5-qtx11extras
+        - google-chrome-stable
+        - tilix
+        - flameshot
+        - ulauncher
+        - zsh
+        - gnome-tweak-tool
+        - numix-icon-theme-circle 
+        - code
+        - cockpit
+        - cockpit-machines
+        - '@virtualization'
+        - '@development-tools'
+        - podman
+        - git
+        - sublime-text
+
+    - name: Install slack rpm
+      ansible.builtin.dnf:
+        name: https://downloads.slack-edge.com/desktop-releases/linux/x64/4.41.105/slack-4.41.105-0.1.el8.x86_64.rpm
+        state: present 
+        disable_gpg_check: true
+
+    - name: Set default editor to vim
+      ansible.builtin.lineinfile:
+        path: /etc/profile
+        line: "export EDITOR=vim"
+
+    - name: Remove Thunderbird
+      ansible.builtin.dnf:
+        name: thunderbird
+        state: absent
+        autoremove: yes
+
+    - name: Remove Libreoffice
+      ansible.builtin.dnf:
+        name: libreoffice-core
+        state: absent
+        autoremove: yes
+
+    - name: Enable service and start Cockpit
+      ansible.builtin.service:
+        name: cockpit.socket
+        enabled: yes
+        state: started
+
+    - name: Enable and start libvirtd
+      ansible.builtin.service:
+        name: libvirtd
+        enabled: yes
+        state: started
+
+    - name: yum-clean-metadata
+      ansible.builtin.command: yum clean all
+
+    - name: Config fedora cinnamon theme
+      ansible.builtin.shell: |
+        gsettings set org.cinnamon.theme name Mint-Y-Dark-Aqua
+        gsettings set org.cinnamon.desktop.interface icon-theme Numix-Circle 
+        gsettings set org.cinnamon.desktop.wm.preferences theme Adwaita
+        gsettings set org.cinnamon.desktop.interface gtk-theme Mint-Y-Dark-Aqua
+
+    - name: Ensure there is a cron to update the packages and system at 21 hour every day of the week "0 21 * * 1-5 root /usr/bin/dnf update -y"
+      ansible.builtin.cron:
+        name: "Update dnf packages and system"
+        minute: "0"
+        hour: "21"
+        weekday: "1-5"
+        user: root
+        job: "/usr/bin/dnf update -y"
