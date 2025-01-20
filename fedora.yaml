@@ -5,6 +5,7 @@
   become: true
   vars:
     minimalInstall: "{{ minimalInstall | default(false) }}"
+    setCronUpdate: "{{ setCronUpdate | default(false) }}"
 
   tasks:
     - block:
@@ -162,3 +163,4 @@
         weekday: "1-5"
         user: root
         job: "/usr/bin/dnf update -y"
+      when: setCronUpdate == true
