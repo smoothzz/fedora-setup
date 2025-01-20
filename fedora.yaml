@@ -1,10 +1,22 @@
-- name: Configure computer
+- name: Configure clean install of fedora cinnamon netinstall
   hosts: localhost
   connection: local
   gather_facts: true
   become: true
+  vars:
+    minimalInstall: "{{ minimalInstall | default(false) }}"
 
   tasks:
+    - block:
+      - name: Install cinnamon if netinstall minimal
+        ansible.builtin.dnf:
+          name: cinnamon-desktop
+          state: present
+  
+      - name: Set graphical target
+        ansible.builtin.command: "systemctl set-default graphical.target"
+      when: minimalInstall == true
+      
     - name: Install core
       ansible.builtin.yum:
         name: "{{ packages }}"
