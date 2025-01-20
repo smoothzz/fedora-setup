@@ -94,6 +94,8 @@
         - git
         - sublime-text
         - crontab
+        - pass
+        - pass-otp
 
     - name: Install slack rpm
       ansible.builtin.dnf:
