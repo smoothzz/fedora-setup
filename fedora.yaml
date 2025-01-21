@@ -3,21 +3,8 @@
   connection: local
   gather_facts: true
   become: true
-  vars:
-    minimalInstall: "{{ minimalInstall | default(false) }}"
-    setCronUpdate: "{{ setCronUpdate | default(false) }}"
 
-  tasks:
-    - block:
-      - name: Install cinnamon if netinstall minimal
-        ansible.builtin.dnf:
-          name: cinnamon-desktop
-          state: present
-  
-      - name: Set graphical target
-        ansible.builtin.command: "systemctl set-default graphical.target"
-      when: minimalInstall == true
-      
+  tasks:      
     - name: Install core
       ansible.builtin.yum:
         name: "{{ packages }}"
@@ -109,6 +96,7 @@
         - crontab
         - pass
         - pass-otp
+        - awscli
 
     - name: Install slack rpm
       ansible.builtin.dnf:
@@ -150,17 +138,7 @@
 
     - name: Config fedora cinnamon theme
       ansible.builtin.shell: |
-        gsettings set org.cinnamon.theme name Mint-Y-Dark-Aqua
-        gsettings set org.cinnamon.desktop.interface icon-theme Numix-Circle 
+        gsettings set org.cinnamon.theme name Mint-Y-Dark-Blue
+        gsettings set org.cinnamon.desktop.interface icon-theme Paper-Mono-Dark
         gsettings set org.cinnamon.desktop.wm.preferences theme Adwaita
-        gsettings set org.cinnamon.desktop.interface gtk-theme Mint-Y-Dark-Aqua
-
-    - name: Ensure there is a cron to update the packages and system at 21 hour every day of the week "0 21 * * 1-5 root /usr/bin/dnf update -y"
-      ansible.builtin.cron:
-        name: "Update dnf packages and system"
-        minute: "0"
-        hour: "21"
-        weekday: "1-5"
-        user: root
-        job: "/usr/bin/dnf update -y"
-      when: setCronUpdate == true
+        gsettings set org.cinnamon.desktop.interface gtk-theme Mint-Y-Dark-Blue
