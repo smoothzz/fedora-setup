@@ -49,6 +49,14 @@
         baseurl: https://download.sublimetext.com/rpm/stable/x86_64
         enabled: yes
 
+    - name: Add HashiCorp repository
+      yum_repository:
+        name: hashicorp
+        description: HashiCorp Repository
+        baseurl: "https://rpm.releases.hashicorp.com/fedora/{{ ansible_distribution_major_version }}/{{ ansible_architecture }}/stable"
+        enabled: yes
+        gpgcheck: no
+
     - name: Add RPM Fusion free repository
       yum_repository:
         name: rpmfusion-free
@@ -97,6 +105,8 @@
         - pass
         - pass-otp
         - awscli
+        - terraform
+        - rsyslog
 
     - name: Install slack rpm
       ansible.builtin.dnf:
@@ -135,6 +145,12 @@
 
     - name: yum-clean-metadata
       ansible.builtin.command: yum clean all
+
+    - name: Start and enable rsyslog
+      ansible.builtin.service:
+        name: rsyslog
+        state: started
+        enabled: true
 
     - name: Config fedora cinnamon theme
       ansible.builtin.shell: |
