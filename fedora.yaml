@@ -123,13 +123,11 @@
       ansible.builtin.dnf:
         name: thunderbird
         state: absent
-        autoremove: yes
+        autoremove: no
+        update_cache: no
 
-    - name: Remove Libreoffice
-      ansible.builtin.dnf:
-        name: libreoffice-core
-        state: absent
-        autoremove: yes
+    - name: Force remove libreoffice
+      ansible.builtin.command: dnf5 remove -y libreoffice*
 
     - name: Enable service and start Cockpit
       ansible.builtin.service:
@@ -151,10 +149,3 @@
         name: rsyslog
         state: started
         enabled: true
-
-    - name: Config fedora cinnamon theme
-      ansible.builtin.shell: |
-        gsettings set org.cinnamon.theme name Mint-Y-Dark-Blue
-        gsettings set org.cinnamon.desktop.interface icon-theme Paper-Mono-Dark
-        gsettings set org.cinnamon.desktop.wm.preferences theme Adwaita
-        gsettings set org.cinnamon.desktop.interface gtk-theme Mint-Y-Dark-Blue
