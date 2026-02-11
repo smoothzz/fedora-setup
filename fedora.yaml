@@ -110,7 +110,7 @@
 
     - name: Install slack rpm
       ansible.builtin.dnf:
-        name: https://downloads.slack-edge.com/desktop-releases/linux/x64/4.41.105/slack-4.41.105-0.1.el8.x86_64.rpm
+        name: https://downloads.slack-edge.com/desktop-releases/linux/x64/4.47.69/slack-4.47.69-0.1.el8.x86_64.rpm
         state: present 
         disable_gpg_check: true
 
