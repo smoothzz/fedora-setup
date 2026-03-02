@@ -107,6 +107,7 @@
         - awscli
         - terraform
         - rsyslog
+        - fuse-libs
 
     - name: Install slack rpm
       ansible.builtin.dnf:
