@@ -101,7 +101,7 @@
         - podman
         - git
         - sublime-text
-        - crontab
+        - cronie
         - pass
         - pass-otp
         - awscli
